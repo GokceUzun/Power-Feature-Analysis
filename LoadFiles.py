@@ -44,22 +44,21 @@ def convert_dat_to_npy(filename, path_to_folder, path_to_save_folder, save_as_na
     os.chdir(path_to_save_folder)
     
     np.save(save_as_name, data_to_save)
-
     print('File saved for ' + save_as_name)
 
 
-# Depending on depending on the animals, the loop can be altered.
-animals = ["S7098"] # ["S7098", "S7072"] beware that it takes a lot of time!
-for animal in animals:
-    filenames = [f for f in os.listdir(path_to_folder + animal) if ".dat" in f]
+'''Save the baseline recording for 3 wildtype and 3 gap animals'''
+# S7063, S7064, S7069 = GAP 
+#gap_animals = ["S7063", "S7064", "S7069"]  
+#for animal in gap_animals:
+ #   filenames = [f for f in os.listdir(path_to_folder + animal) if (".dat" in f) & ("Baseline" in f)]
+  #  for f in filenames:
+   #     convert_dat_to_npy(filename = f, path_to_folder = path_to_folder + animal, path_to_save_folder = path_to_save_folder, save_as_name = animal + "_GAP")
 
-    # To convert all the files:
-    for f in filenames:
-        print(f)
-        convert_dat_to_npy(filename = f, path_to_folder = path_to_folder + animal, path_to_save_folder = path_to_save_folder + animal, save_as_name = f.replace(".dat", ""))
-
-    # To convert a single file: 
-    #convert_dat_to_npy(filename = filenames[0], path_to_folder = path_to_folder + animal, path_to_save_folder = path_to_save_folder + animal, save_as_name = filenames[0].replace(".dat", ""))
-
-
+# S7068, S7070, S7071 = WT 
+#wt_animals = ["S7068", "S7070", "S7071"]  
+#for animal in wt_animals:
+ #   filenames = [f for f in os.listdir(path_to_folder + animal) if (".dat" in f) & ("Baseline" in f)]
+  #  for f in filenames:
+   #     convert_dat_to_npy(filename = f, path_to_folder = path_to_folder + animal, path_to_save_folder = path_to_save_folder, save_as_name = animal + "_WT")
 
