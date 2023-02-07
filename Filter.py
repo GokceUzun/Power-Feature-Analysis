@@ -21,6 +21,7 @@ class Filter:
 
     def __init__(self, unfiltered_data):
         self.unfiltered_data = unfiltered_data
+        self.noise_index = [] # Index tracker to keep tract of the indices that are discarded
 
     def butter_bandpass(self):
         
@@ -29,18 +30,22 @@ class Filter:
         butter_b, butter_a = signal.butter(self.order, [self.low, self.high], btype='band', analog = False)
         
         filtered_data = signal.filtfilt(butter_b, butter_a, self.unfiltered_data)
-    
+        
+        
         for channel in filtered_data:
-            for value in channel:
+            noisy_values = []
+            for i, value in enumerate(channel):
                 if value >= self.noise_limit:
                     channel_threshold.append(value)
+                    noisy_values.append(i)
                 else:
-                    pass 
-            
-        remove_duplicates = sorted(list(set(channel_threshold)))
-
-        channels_without_noise = [i for j, i in enumerate(filtered_data) if j not in remove_duplicates]
+                    pass
+            self.noise_index.append(noisy_values) 
         
+        remove_duplicates = sorted(list(set(channel_threshold)))
+        
+        channels_without_noise = [i for j, i in enumerate(filtered_data) if j not in remove_duplicates]
+        #print(len(self.noise_index))
         return channels_without_noise # Returns the filtered numpy array 
 
 
