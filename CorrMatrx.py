@@ -16,6 +16,8 @@ import random
 import scipy
 import seaborn as sns
 
+from IPython.display import display
+
 baseline_1 = ['brain_states_1_S7063.pkl', 'brain_states_1_S7064.pkl', 'brain_states_1_S7069.pkl','brain_states_1_S7068.pkl', 'brain_states_1_S7070.pkl', 'brain_states_1_S7071.pkl']
 baseline_2 = ['brain_states_2_S7063.pkl', 'brain_states_2_S7064.pkl', 'brain_states_2_S7069.pkl', 'brain_states_2_S7070.pkl']
 recordings = ['S7063_GAP.npy', 'S7069_GAP.npy', 'S7064_GAP.npy', 'S7071_WT.npy', 'S7070_WT.npy', 'S7068_WT.npy']
@@ -95,17 +97,34 @@ class animal():
         raw_info = mne.create_info(ch_names, sfreq = 250.4, ch_types=ch_types)
         raw = mne.io.RawArray(e, raw_info)
         raw.plot(scalings="auto", title=str(self.no) + "-bl" +  str(self.baseline) + "-" + str(sleep_stage))
-        #plt.show()
+        plt.show()
         
         # 3) Calculate the correlation matrices for those to decide on the channels 
         psd = calculate_psd(e, False).T
         psd.set_axis(['ch1', 'ch2', 'ch3', 'ch4', 'ch5', 'ch6', 'ch7', 'ch8', 'ch9', 'ch10', 'ch11', 'ch12', 'ch13', 'ch14', 'ch15', 'ch16'], axis="columns", inplace=True)
         
-        f = plt.figure(figsize=(12, 8))
         corrMatrix = psd.corr()
-        sns.heatmap(corrMatrix, annot=True)
-        plt.title(str(self.no) + "-bl" +  str(self.baseline) + "-" + str(sleep_stage))
-        plt.show()
+
+        # Plot the correlation matrix heatmap - optional
+        #f = plt.figure(figsize=(12, 8))
+        #sns.heatmap(corrMatrix, annot=True)
+        #plt.title(str(self.no) + "-bl" +  str(self.baseline) + "-" + str(sleep_stage))
+        #plt.show()
+
+        df_corr = corrMatrix.stack().reset_index()
+        df_corr.columns = ['FEATURE_1', 'FEATURE_2', 'CORRELATION']
+        mask_dups = (df_corr[['FEATURE_1', 'FEATURE_2']].apply(frozenset, axis=1).duplicated()) | (df_corr['FEATURE_1']==df_corr['FEATURE_2'])
+        df_corr = df_corr[~mask_dups]
+        df_corr = df_corr.sort_values(by=['CORRELATION'], kind='quicksort', ascending=False)
+        df_corr = df_corr[df_corr.CORRELATION < 1]
+        sorted_corr = df_corr[df_corr.CORRELATION > 0.5]
+
+        os.chdir('/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project/')
+        sorted_corr.to_excel('corr.xlsx')
+
+
+
+
 
 
 # Calculate the correlation matrix for each animal, twice for each stage 
@@ -117,14 +136,8 @@ class animal():
 # rem = 2
 
 # GAP = S7063, S7064, S7069
+# WT = S7068, S7070, S7071 
+
 animal_S7063_bl1 = animal("S7063", 1, 15324481, 36959040)
 animal_S7063_bl1.corrMatrix(0)
-animal_S7063_bl1.corrMatrix(1)
-animal_S7063_bl1.corrMatrix(2)
 
-animal_S7063_bl2 = animal("S7063", 2, 36959041, 58593600)
-animal_S7063_bl2.corrMatrix(0)
-animal_S7063_bl2.corrMatrix(1)
-animal_S7063_bl2.corrMatrix(2)
-
-# WT = S7068, S7070, S7071 
