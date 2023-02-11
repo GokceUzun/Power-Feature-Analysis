@@ -26,5 +26,32 @@ class Filter:
         filtered_data = signal.filtfilt(butter_b, butter_a, self.unfiltered_data)
         return filtered_data
 
+    def reshape_filtered_data(self, filtered_data):
+        #function to reshape data into 5 second epoch bins 
+        dataset_length = (len(filtered_data[0])) #calculate total number of data points
         
+        number_of_epochs = dataset_length/1252
+
+        reshaped_data = filtered_data.reshape(16, number_of_epochs, -1)
+
+        return reshaped_data
+
+    def packet_loss_indices(self, reshaped_data):
+        #function to return list of values where 0 = clean and 6 = packet loss and each value represents the entire epoch
+        def packet_loss(epoch):
+            mask = epoch.max() < 3000
+            return mask
+
+        packet_loss_array = np.apply_along_axis(packet_loss, -1, arr = reshaped_data)
         
+        #returns a boolean array, True == where values are below noise_threshold, false is where epochs are above. 
+
+        packet_loss_indices = []
+        for idx, epoch in enumerate(packet_loss_array[0]):
+            if epoch == False:
+                packet_loss_indices.append(6)
+            else:
+                packet_loss_indices.append(0)
+        #returns a list of indices where 0 is clean epochs and 6 is packet loss or non-physiological noise
+
+        return packet_loss_array, packet_loss_indices
