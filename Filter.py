@@ -55,3 +55,8 @@ class Filter:
         #returns a list of indices where 0 is clean epochs and 6 is packet loss or non-physiological noise
 
         return packet_loss_array, packet_loss_indices
+
+fltr_instance = Filter_Basic(unfiltered_data)
+filtered_data = fltr_instance.butter_bandpass()
+reshaped_data = fltr_instance.reshape_filtered_data(filtered_data)
+packet_loss_array, packet_loss_idx = fltr_instance.packet_loss_indices(reshaped_data)
