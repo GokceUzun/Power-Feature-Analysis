@@ -14,9 +14,11 @@ class LoadData:
     display_decimation = 1
 
 
-    def __init__(self, directory, filename):
+    def __init__(self, directory, filename, start, end):
         self.directory = directory
         self.filename = filename
+        self.start = start
+        self.end = end
 
 
     # If the data is in .dat format: 
@@ -35,7 +37,7 @@ class LoadData:
         # Build the time array
         t = np.arange(len(dat_chans[0]), dtype=float) / self.sample_rate
         
-        return np.array(dat_chans), t
+        return np.array(dat_chans)
 
 
     # Get the data directly if it is already in .npy format:
@@ -49,7 +51,7 @@ class LoadData:
         
         os.chdir(self.directory)
         
-        dat_chans, t = self.parse_dat()
+        dat_chans = self.parse_dat()
         
         data_to_save = np.array(dat_chans)
         
@@ -67,10 +69,11 @@ class LoadData:
 #save_as_name = 'S7072xxx'
 #data = LoadData(directory = directory, filename=filename)
 #data.convert_dat_to_npy(path_to_save_folder=path_to_save_folder, save_as_name=save_as_name)
-#unfiltered_data, t = data.parse_dat()
+#unfiltered_data = data.parse_dat()
 
-#directory = '/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project/S7072'
-#filename = 'S7072xxx.npy'
-#data = LoadData(directory=directory, filename=filename)
-#loaded_data = data.get_dat()
+directory = '/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project'
+filename = 'S7063_GAP.npy'
+data = LoadData(directory=directory, filename=filename, start=15324481, end=36959040)
+loaded_data = data.get_dat()[:, data.start:data.end + 1]
+print(len(loaded_data[0]))
 
