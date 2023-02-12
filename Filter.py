@@ -10,47 +10,53 @@ import numpy as np
 
 class Filter:
 
-    # Variables
     order = 3
-    sampling_rate = 250.4
+    sampling_rate = 250.4 
     nyquist = 125.2
     low = 0.2/nyquist
     high = 100/nyquist
-    noise_limit = 3000
-    epoch_bins = 1252 #5 seconds * sampling rate
-
+    
     def __init__(self, unfiltered_data):
         self.unfiltered_data = unfiltered_data
-        self.noise_index = [] # Index tracker to keep tract of the indices that are discarded
-
+        
     def butter_bandpass(self):
-        
-        channel_threshold = []
-        
-        butter_b, butter_a = signal.butter(self.order, [self.low, self.high], btype='band', analog = False)
-        
+        #stripped filter function to apply bandpass filter to entire recording before time and frequency domain calculations
+
+        butter_b, butter_a = signal.butter(self.order, [self.low, self.high], btype = 'band', analog = False)
         filtered_data = signal.filtfilt(butter_b, butter_a, self.unfiltered_data)
-        
-        
-        for channel in filtered_data:
-            noisy_values = []
-            for i, value in enumerate(channel):
-                if value >= self.noise_limit:
-                    channel_threshold.append(value)
-                    noisy_values.append(i)
-                else:
-                    pass
-            self.noise_index.append(noisy_values) 
-        
-        remove_duplicates = sorted(list(set(channel_threshold)))
-        
-        channels_without_noise = [i for j, i in enumerate(filtered_data) if j not in remove_duplicates]
-        #print(len(self.noise_index))
-        return channels_without_noise # Returns the filtered numpy array 
+        return filtered_data
 
+    def reshape_filtered_data(self, filtered_data):
+        #function to reshape data into 5 second epoch bins 
+        dataset_length = (len(filtered_data[0])) #calculate total number of data points
+        
+        number_of_epochs = dataset_length/1252
 
-#directory = '/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project/S7072'
-#os.chdir(directory)
-#unfiltered_data = np.load('TAINI_1033_S7072_Baseline-2020_03_16-0000.npy')
-#f = Filter(unfiltered_data)
-#filtered_data = f.butter_bandpass()
+        reshaped_data = filtered_data.reshape(16, number_of_epochs, -1)
+
+        return reshaped_data
+
+    def packet_loss_indices(self, reshaped_data):
+        #function to return list of values where 0 = clean and 6 = packet loss and each value represents the entire epoch
+        def packet_loss(epoch):
+            mask = epoch.max() < 3000
+            return mask
+
+        packet_loss_array = np.apply_along_axis(packet_loss, -1, arr = reshaped_data)
+        
+        #returns a boolean array, True == where values are below noise_threshold, false is where epochs are above. 
+
+        packet_loss_indices = []
+        for idx, epoch in enumerate(packet_loss_array[0]):
+            if epoch == False:
+                packet_loss_indices.append(6)
+            else:
+                packet_loss_indices.append(0)
+        #returns a list of indices where 0 is clean epochs and 6 is packet loss or non-physiological noise
+
+        return packet_loss_array, packet_loss_indices
+
+fltr_instance = Filter_Basic(unfiltered_data)
+filtered_data = fltr_instance.butter_bandpass()
+reshaped_data = fltr_instance.reshape_filtered_data(filtered_data)
+packet_loss_array, packet_loss_idx = fltr_instance.packet_loss_indices(reshaped_data)
