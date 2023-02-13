@@ -60,6 +60,9 @@ class LoadData:
         np.save(save_as_name, data_to_save)
         print('File saved for ' + save_as_name)
 
+    def slice_data(self, unfiltered_data):
+        return unfiltered_data[:, self.start:self.end + 1]
+
 
 #Examples:
 
@@ -74,6 +77,7 @@ class LoadData:
 directory = '/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project'
 filename = 'S7063_GAP.npy'
 data = LoadData(directory=directory, filename=filename, start=15324481, end=36959040)
-loaded_data = data.get_dat()[:, data.start:data.end + 1]
-print(len(loaded_data[0]))
+loaded_data = data.get_dat()
+unfiltered = data.slice_data(loaded_data)
+print(len(unfiltered[0]))
 
