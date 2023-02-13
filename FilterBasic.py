@@ -72,7 +72,8 @@ class Filter:
 directory = '/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project'
 filename = 'S7063_GAP.npy'
 data = LoadData(directory=directory, filename=filename, start=15324481, end=36959040)
-unfiltered_data = data.get_dat()[:, data.start:data.end + 1]
+unfiltered_data = data.get_dat()
+unfiltered_data = data.slice_data(unfiltered_data)
 print(unfiltered_data)
 
 fltr_instance = Filter(unfiltered_data)
