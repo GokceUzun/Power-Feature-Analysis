@@ -13,7 +13,7 @@ class CentreofMass():
     
     def frequency_slice(self):
         #input power dataframe
-        freq_df = self.df[(self.df['Frequency'] >= 1) & (self.df['Frequency']) <= 49]
+        freq_df = self.df[(self.df['Frequency'] >= 1) & (self.df['Frequency'] <= 49)]
 
         #select power and frequency columns 
         power_array = freq_df['Power'].to_numpy()
