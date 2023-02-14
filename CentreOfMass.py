@@ -13,11 +13,11 @@ class CentreofMass():
     
     def frequency_slice(self):
         #input power dataframe
-        freq_df = self.df[(self.df['Frequency'] >= 1) & (self.df'Frequency') <= 49]
+        freq_df = self.df[(self.df['Frequency'] >= 1) & (self.df['Frequency']) <= 49]
 
         #select power and frequency columns 
-        power_array = freq_array['Power'].to_numpy()
-        freq_array = freq_array['Frequency'].to_numpy()
+        power_array = freq_df['Power'].to_numpy()
+        freq_array = freq_df['Frequency'].to_numpy()
 
         return power_array, freq_array
 
@@ -34,9 +34,3 @@ class CentreofMass():
         centre_of_mass = sum(summed_freq_power)/sum_power
 
         return centre_of_mass
-
-
-
-
-
-        
