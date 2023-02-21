@@ -63,14 +63,6 @@ class LoadData:
     # Slices the data from the start and end indices
     def slice_data(self, unfiltered_data):
         return unfiltered_data[:, self.start:self.end + 1]
-    
-    # Select channels
-    # If don't want to select channels and use 16 of them, no need to use this function
-    # Can be applied to unfiltered data or sliced data (both with 16 channels)
-    # Can be applied before/after slicing
-    def select_channels(self, data, channels):
-        return data[channels]
-
 
 
 """
