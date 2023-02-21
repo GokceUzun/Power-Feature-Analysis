@@ -23,7 +23,6 @@ class Filter:
     def __init__(self, unfiltered_data):
         self.unfiltered_data = unfiltered_data
         self.noise_index = [] # Index tracker to keep tract of the indices that are discarded
-        self.channels = [i for i in range(16)]
 
     def butter_bandpass(self):
         
