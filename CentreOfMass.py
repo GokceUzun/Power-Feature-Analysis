@@ -4,12 +4,8 @@ import pandas as pd
 
 class CentreofMass():
 
-    def __init__(self, df, brainstate_number, channel, animal_id):
-        self.df = df 
-        self.brainstate_number = brainstate_number
-        self.channel = channel 
-        self.animal_id = animal_id
-
+    def __init__(self, df):
+        self.df = df
     
     def frequency_slice(self):
         #input power dataframe
