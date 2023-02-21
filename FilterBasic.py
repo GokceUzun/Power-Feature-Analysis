@@ -23,6 +23,7 @@ class Filter:
     def __init__(self, unfiltered_data):
         self.unfiltered_data = unfiltered_data
         self.noise_index = [] # Index tracker to keep tract of the indices that are discarded
+        self.channels = [i for i in range(16)]
 
     def butter_bandpass(self):
         
@@ -61,6 +62,12 @@ class Filter:
 
         #returns a list of indices where 0 is clean epochs and 6 is packet loss or non-physiological noise
         return packet_loss_array, packet_loss_indices
+    
+
+    # Select channels, default is 16 unless the function is called
+    def select_channels(self, reshaped_data, channels):
+        self.channels = channels
+        return reshaped_data[channels]
     
 
 
