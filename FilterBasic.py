@@ -63,11 +63,9 @@ class Filter:
         return packet_loss_array, packet_loss_indices
     
 
-    # Select channels
-    # If don't want to select channels and use 16 of them, no need to use this function
-    # Can be applied to filtered data or reshaped data (both with 16 channels)
-    def select_channels(self, data, channels):
-        return data[channels]
+    # Select channels from the reshaped data
+    def select_channels(self, reshaped_data, channels):
+        return reshaped_data[channels]
 
 
 """
