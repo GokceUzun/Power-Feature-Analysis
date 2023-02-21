@@ -25,7 +25,7 @@ class FrequencyDomainFeatures:
         centre_of_mass = []
         peaks = []
 
-        for i, ch in df.head(5).iterrows():
+        for i, ch in df.iterrows():
             ps = []
             tp = []
             bp1 = []
