@@ -28,18 +28,16 @@ class Filter:
         
         #stripped filter function to apply bandpass filter to entire recording before time and frequency domain calculations
         butter_b, butter_a = signal.butter(self.order, [self.low, self.high], btype='band', analog = False)
-        
         filtered_data = signal.filtfilt(butter_b, butter_a, self.unfiltered_data)
-        
         return filtered_data
         
     def reshape_filtered_data(self, filtered_data):
-        #function to reshape data into 5 second epoch bins 
         
+        #function to reshape data into 5 second epoch bins 
         dataset_length = (len(filtered_data[0])) #calculate total number of data points
-        print(dataset_length)
+        #print(dataset_length)
         number_of_epochs = int(dataset_length/1252)
-        print(number_of_epochs)
+        #print(number_of_epochs)
         reshaped_data = filtered_data.reshape(16, number_of_epochs, -1)
         
         return reshaped_data
@@ -48,45 +46,47 @@ class Filter:
         #function to return list of values where 0 = clean and 6 = packet loss and each value represents the entire epoch
         
         def packet_loss(epoch):
-            
             mask = epoch.max() < 3000
             return mask
         
         packet_loss_array = np.apply_along_axis(packet_loss, -1, arr = reshaped_data)
         
         #returns a boolean array, True == where values are below noise_threshold, false is where epochs are above. 
-        
         packet_loss_indices = []
         for idx, epoch in enumerate(packet_loss_array[0]):
             if epoch == False:
                 packet_loss_indices.append(6)
             else:
                 packet_loss_indices.append(0)
+
         #returns a list of indices where 0 is clean epochs and 6 is packet loss or non-physiological noise
-        
         return packet_loss_array, packet_loss_indices
+    
+
+    # Select channels
+    # If don't want to select channels and use 16 of them, no need to use this function
+    # Can be applied to filtered data or reshaped data (both with 16 channels)
+    def select_channels(self, data, channels):
+        return data[channels]
 
 
-
+"""
 # TESTING: 
 directory = '/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project'
 filename = 'S7063_GAP.npy'
 data = LoadData(directory=directory, filename=filename, start=15324481, end=36959040)
 unfiltered_data = data.get_dat()
 unfiltered_data = data.slice_data(unfiltered_data)
-print(unfiltered_data)
 
 fltr_instance = Filter(unfiltered_data)
-print(fltr_instance)
-print("\n")
 filtered_data = fltr_instance.butter_bandpass()
-print(filtered_data)
-print("\n")
 reshaped_data = fltr_instance.reshape_filtered_data(filtered_data)
-print(reshaped_data)
-print("\n")
 packet_loss_array, packet_loss_idx = fltr_instance.packet_loss_indices(reshaped_data)
-print(packet_loss_array)
-print("\n")
-print(packet_loss_idx)
-print("\n")
+
+print(len(reshaped_data))
+print(len(reshaped_data[0]))
+print(reshaped_data[0])
+print(len(reshaped_data[0][0]))
+print(reshaped_data[0][0])
+"""
+

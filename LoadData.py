@@ -60,10 +60,19 @@ class LoadData:
         np.save(save_as_name, data_to_save)
         print('File saved for ' + save_as_name)
 
+    # Slices the data from the start and end indices
     def slice_data(self, unfiltered_data):
         return unfiltered_data[:, self.start:self.end + 1]
+    
+    # Select channels
+    # If don't want to select channels and use 16 of them, no need to use this function
+    # Can be applied to unfiltered data or sliced data (both with 16 channels)
+    def select_channels(self, data, channels):
+        return data[channels]
 
 
+
+"""
 #Examples:
 
 #directory = '/Volumes/Gonzalez-Sulser/SYNGAP SLEEP 24hr PAPER/Circadian-ETX/TAINI files/S7072'
@@ -79,5 +88,5 @@ filename = 'S7063_GAP.npy'
 data = LoadData(directory=directory, filename=filename, start=15324481, end=36959040)
 loaded_data = data.get_dat()
 unfiltered = data.slice_data(loaded_data)
-print(len(unfiltered[0]))
-
+#print(len(unfiltered[0]))
+"""
