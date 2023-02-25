@@ -17,20 +17,22 @@ class FrequencyDomainFeatures:
         df.columns = ["ch" + str(i) for i in channels]
 
         # Frequency domain features:
-        power_spectrum = []
+        #power_spectrum = []
         total_power = []
-        band1_power = []
-        band2_power = []
-        band3_power = []
+        band1_power = [] # 5-9Hz
+        band2_power = [] # 1-20Hz
+        band3_power = [] # 60-90Hz
+        band4_power = [] # 1-5Hz
         centre_of_mass = []
         peaks = []
 
         for i, ch in df.iterrows():
-            ps = []
+            #ps = []
             tp = []
             bp1 = []
             bp2 = []
             bp3 = []
+            bp4 = []
             com = []
             p = []
 
@@ -40,7 +42,7 @@ class FrequencyDomainFeatures:
 
                 freq_res = freqs[1] - freqs[0]  # frequency resolution (0.2)
 
-                ps.append(psd)
+                #ps.append(psd)
 
                 tp.append(
                     simps(psd, dx=freq_res)
@@ -57,6 +59,9 @@ class FrequencyDomainFeatures:
                 bp3.append(
                     simps(psd[np.logical_and(freqs >= 60, freqs <= 90)], dx=freq_res)
                 )  # 60-90Hz
+                bp4.append(
+                    simps(psd[np.logical_and(freqs >= 1, freqs < 5)], dx=freq_res)
+                )  # 1-5Hz
 
                 # centre of mass calculation
                 df_pow = pd.DataFrame(psd, columns=["Power"])
@@ -67,18 +72,19 @@ class FrequencyDomainFeatures:
 
                 p.append(psd[np.argmax(psd)])
 
-            power_spectrum.append(ps)
+            #power_spectrum.append(ps)
             total_power.append(tp)
             band1_power.append(bp1)
             band2_power.append(bp2)
             band3_power.append(bp3)
+            band4_power.append(bp4)
             centre_of_mass.append(com)
             peaks.append(p)
 
         # feature arrays to dataframe
-        df_psd = pd.DataFrame(
-            power_spectrum, columns=["psd_ch" + str(i) for i in channels]
-        )
+        #df_psd = pd.DataFrame(
+         #   power_spectrum, columns=["psd_ch" + str(i) for i in channels]
+        #) 
 
         df_tp = pd.DataFrame(
             total_power, columns=["totalP_ch" + str(i) for i in channels]
@@ -96,6 +102,10 @@ class FrequencyDomainFeatures:
             band3_power, columns=["60-90Hz_ch" + str(i) for i in channels]
         )
 
+        df_bp4 = pd.DataFrame(
+            band4_power, columns=["1-5Hz_ch" + str(i) for i in channels]
+        )
+
         df_com = pd.DataFrame(
             centre_of_mass, columns=["com_ch" + str(i) for i in channels]
         )
@@ -106,8 +116,8 @@ class FrequencyDomainFeatures:
 
         # concat all the features in one dataframe
         freq_dom_f = pd.concat(
-            [df_psd, df_tp, df_bp1, df_bp2, df_bp3, df_com, df_peaks], axis=1
-        )
+            [df_tp, df_bp1, df_bp2, df_bp3, df_bp4, df_com, df_peaks], axis=1
+        ) # NOT adding the PSD to the feature matrix because the type is different
 
         return freq_dom_f
 
