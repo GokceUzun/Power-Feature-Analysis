@@ -36,9 +36,9 @@ class FrequencyDomainFeatures:
             com = []
             p = []
 
-            for c in ch:
+            for c in ch.index:
                 # Calculate power spectral density and the frequency array
-                freqs, psd = scipy.signal.welch(c, 250.4, window="hann", nperseg=1252)
+                freqs, psd = scipy.signal.welch(ch[c], 250.4, window="hann", nperseg=1252)
 
                 freq_res = freqs[1] - freqs[0]  # frequency resolution (0.2)
 
@@ -50,18 +50,26 @@ class FrequencyDomainFeatures:
 
                 # find intersecting values in frequency vector: idx_band = np.logical_and(freqs >= low, freqs <= high)
                 # for each band compute power by approximating the area under the  curve
-                bp1.append(
-                    simps(psd[np.logical_and(freqs >= 5, freqs <= 9)], dx=freq_res)
-                )  # 5-9Hz
-                bp2.append(
-                    simps(psd[np.logical_and(freqs >= 1, freqs <= 20)], dx=freq_res)
-                )  # 1-20Hz
-                bp3.append(
-                    simps(psd[np.logical_and(freqs >= 60, freqs <= 90)], dx=freq_res)
-                )  # 60-90Hz
-                bp4.append(
-                    simps(psd[np.logical_and(freqs >= 1, freqs < 5)], dx=freq_res)
-                )  # 1-5Hz
+                if c == 'ch1' or c == 'ch14': # EMG channel only calculate 60-90Hz
+                    bp1.append(None)  # 5-9Hz
+                    bp2.append(None)  # 1-20Hz
+                    bp3.append(
+                        simps(psd[np.logical_and(freqs >= 60, freqs <= 90)], dx=freq_res)
+                    )  # 60-90Hz
+                    bp4.append(None)  # 1-5Hz
+
+                else: # EEG channels calculate bands except 60-90Hz
+                    bp1.append(
+                        simps(psd[np.logical_and(freqs >= 5, freqs <= 9)], dx=freq_res)
+                    )  # 5-9Hz
+                    bp2.append(
+                        simps(psd[np.logical_and(freqs >= 1, freqs <= 20)], dx=freq_res)
+                    )  # 1-20Hz
+                    bp3.append(None)  # 60-90Hz
+                    bp4.append(
+                        simps(psd[np.logical_and(freqs >= 1, freqs < 5)], dx=freq_res)
+                    )  # 1-5Hz
+
 
                 # centre of mass calculation
                 df_pow = pd.DataFrame(psd, columns=["Power"])
@@ -119,8 +127,7 @@ class FrequencyDomainFeatures:
             [df_tp, df_bp1, df_bp2, df_bp3, df_bp4, df_com, df_peaks], axis=1
         ) # NOT adding the PSD to the feature matrix because the type is different
 
-        return freq_dom_f
-
+        return freq_dom_f.dropna(axis=1)
 
 """
 # TESTING:
@@ -130,15 +137,13 @@ data = LoadData(directory=directory, filename=filename, start=15324481, end=3695
 unfiltered_data = data.get_dat()
 unfiltered_data = data.slice_data(unfiltered_data)
 
-fltr_instance = Filter(unfiltered_data)
+fltr_instance = Filter(unfiltered_data, channels=[1, 3, 6, 7, 14])
 filtered_data = fltr_instance.butter_bandpass()
 reshaped_data = fltr_instance.reshape_filtered_data(filtered_data)
 # packet_loss_array, packet_loss_idx = fltr_instance.packet_loss_indices(reshaped_data)
 
-selected_ch = fltr_instance.select_channels(
-    reshaped_data=reshaped_data, channels=[7, 5, 0]
-)
 
-dataframe = FrequencyDomainFeatures(selected_ch, fltr_instance.channels)
+dataframe = FrequencyDomainFeatures(reshaped_data, fltr_instance.channels)
 print(dataframe)
 """
+
