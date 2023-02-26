@@ -50,9 +50,10 @@ class FeaturesData:
                 for bands in ["5-9Hz_", "1-20Hz_", "60-90Hz_", "1-5Hz_"]:
                     new_col = "relPow_" + bands + "ch" + str(ch)
                     band_col = bands + "ch" + str(ch)
+                    if band_col in features.columns.to_list():
+                        b.append(band_col)
+                        features[new_col] = features[band_col] / features[pow_col]
 
-                    b.append(band_col)
-                    features[new_col] = features[band_col] / features[pow_col]
                 p.append(pow_col)
 
             cols_to_remove = b + p
@@ -121,4 +122,3 @@ print(features.columns)
 print(len(features))
 print(len(lables))
 """
-
