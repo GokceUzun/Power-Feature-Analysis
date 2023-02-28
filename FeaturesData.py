@@ -97,7 +97,7 @@ class FeaturesData:
         else:
             finalFeatures = feature_matrix
 
-        return finalFeatures, labels
+        return pd.concat([finalFeatures, labels], axis=1)
 
 
 """
@@ -122,3 +122,22 @@ print(features.columns)
 print(len(features))
 print(len(lables))
 """
+
+# TESTING:
+directory = "/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project"
+filename = "S7063_GAP.npy"
+data = LoadData(directory=directory, filename=filename, start=15324481, end=36959040)
+unfiltered_data = data.get_dat()
+unfiltered_data = data.slice_data(unfiltered_data)
+
+fltr_instance = Filter(unfiltered_data, channels=[3,12,5,9,4,11,1])
+
+features = FeaturesData(
+    fltr_instance,
+    relativePower=False,
+    removeNoise=True,
+    applyPCA=False,
+    brainstatefile="S7063_BL1.pkl",
+)
+
+print(features.columns)
