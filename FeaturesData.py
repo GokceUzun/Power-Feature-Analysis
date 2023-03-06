@@ -37,6 +37,7 @@ class FeaturesData:
         )  # 8 frequency domain features
 
         features = pd.concat([time_dom_features, freq_dom_features], axis=1)
+        
         f_cols = list(time_dom_features.columns.values) + list(
             freq_dom_features.columns.values
         )
@@ -60,32 +61,11 @@ class FeaturesData:
             features.drop(cols_to_remove, axis=1, inplace=True)
             f_cols = list(features.columns.values)
 
-        # Get the brain states from the pickle file:
-        os.chdir(
-            "/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project/OneDrive_2_22-02-2023"
-        )
-        brainstatelabels = pd.read_pickle(brainstatefile)
 
-        labeledFeatures = pd.concat([features, brainstatelabels.brainstate], axis=1)
-        labeledFeatures["packet_loss"] = packet_loss_idx
-
-        # Remove the noisy epochs or keep them:
-        if removeNoise == True:
-            feature_matrix = labeledFeatures[f_cols].loc[
-                labeledFeatures["packet_loss"] == 0
-            ]
-            labels = labeledFeatures["brainstate"].loc[
-                labeledFeatures["packet_loss"] == 0
-            ]
-        else:
-            feature_matrix = labeledFeatures[f_cols]
-            labels = labeledFeatures["brainstate"]
-
-        # Principal Component Analysis - dimensionality reduction:
         if applyPCA == True:
             # Step1 - standardise data
             scalar = StandardScaler()
-            scaled_data = pd.DataFrame(scalar.fit_transform(feature_matrix))
+            scaled_data = pd.DataFrame(scalar.fit_transform(features))
 
             # Step2 - applying principle component analysis
             n = 20
@@ -93,36 +73,40 @@ class FeaturesData:
             pca = PCA(n_components=n)  # Go for components 10-20
             pca.fit(scaled_data)
             data_pca = pca.transform(scaled_data)
-            finalFeatures = pd.DataFrame(data_pca, columns=cols)
+            feature_matrix = pd.DataFrame(data_pca, columns=cols)
         else:
-            finalFeatures = feature_matrix
+            feature_matrix = features
 
-        return pd.concat([finalFeatures, labels], axis=1)
+
+        # Get the brain states from the pickle file:
+        os.chdir(
+            "/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project" # Can change depending on where the pickle files are 
+        )
+
+        brainstatelabels = pd.read_pickle(brainstatefile)
+
+        labeledFeatures = pd.concat([feature_matrix, brainstatelabels.brainstate], axis=1)
+        labeledFeatures["packet_loss"] = packet_loss_idx
+
+
+        # Remove the noisy epochs or keep them:
+        if removeNoise == True:
+            return labeledFeatures.loc[labeledFeatures["packet_loss"] == 0].drop(columns='packet_loss')
+            feature_matrix = labeledFeatures[f_cols].loc[
+                labeledFeatures["packet_loss"] == 0
+            ]
+            labels = labeledFeatures["brainstate"].loc[
+                labeledFeatures["packet_loss"] == 0
+            ]
+        else:
+            return labeledFeatures.drop(columns='packet_loss')
+            feature_matrix = labeledFeatures[f_cols]
+            labels = labeledFeatures["brainstate"]
+
+        return pd.concat([finalFeatures, labels], axis=1, ignore_index=True)
 
 
 """
-# TESTING:
-directory = "/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project"
-filename = "S7063_GAP.npy"
-data = LoadData(directory=directory, filename=filename, start=15324481, end=36959040)
-unfiltered_data = data.get_dat()
-unfiltered_data = data.slice_data(unfiltered_data)
-
-fltr_instance = Filter(unfiltered_data, channels=[3,12,5,9,4,11,1])
-
-features, lables = FeaturesData(
-    fltr_instance,
-    relativePower=False,
-    removeNoise=True,
-    applyPCA=False,
-    brainstatefile="S7063_BL1.pkl",
-)
-
-print(features.columns)
-print(len(features))
-print(len(lables))
-"""
-
 # TESTING:
 directory = "/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project"
 filename = "S7063_GAP.npy"
@@ -136,8 +120,11 @@ features = FeaturesData(
     fltr_instance,
     relativePower=False,
     removeNoise=True,
-    applyPCA=False,
-    brainstatefile="S7063_BL1.pkl",
-)
+    applyPCA=True,
+    brainstatefile="S7063_BL1.pkl")
 
-print(features.columns)
+print(features)
+"""
+
+
+
