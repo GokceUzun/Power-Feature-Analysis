@@ -83,9 +83,12 @@ class FeaturesData:
             "/Volumes/Macintosh HD/Users/gokceuzun/Desktop/4. SENE/Honors Project" # Can change depending on where the pickle files are 
         )
 
-        brainstatelabels = pd.read_pickle(brainstatefile)
+        #brainstatelabels = pd.read_pickle(brainstatefile)
+        #labeledFeatures = pd.concat([feature_matrix, brainstatelabels.brainstate], axis=1)
 
-        labeledFeatures = pd.concat([feature_matrix, brainstatelabels.brainstate], axis=1)
+        brainstatelabels = np.load(brainstatefile, allow_pickle=True)
+        
+        labeledFeatures = pd.concat([feature_matrix, pd.DataFrame(brainstatelabels, columns=['brainstate'])], axis=1)
         labeledFeatures["packet_loss"] = packet_loss_idx
 
 
@@ -126,5 +129,5 @@ features = FeaturesData(
 print(features)
 """
 
-
-
+# S7063_BL1.npy 
+# S7063_BL1.pkl
