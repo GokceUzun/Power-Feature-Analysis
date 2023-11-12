@@ -1,5 +1,3 @@
-# Power-Feature-Analysis
-PSD and frequency domain feature extraction for classification of sleep stages. 
+# Deep Learning for Classification of Sleep Stages from Animal Brain Activity
 
-- Stratified Group K-Fold
 
